@@ -1,0 +1,1 @@
+# shopware-category-extended-description
