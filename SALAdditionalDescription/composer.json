@@ -1,0 +1,31 @@
+{
+    "name": "sal/additional-description",
+    "description": "A plugin to add an additional description field to categories",
+    "version": "1.0.0",
+    "type": "shopware-platform-plugin",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Saloni"
+        }
+    ],
+    "require": {
+        "shopware/core": "~6.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "SALAdditionalDescription\\": "src/"
+        }
+    },
+    "extra": {
+        "shopware-plugin-class": "SALAdditionalDescription\\SALAdditionalDescription",
+        "label": {
+            "en-GB": "Category Extended Description",
+            "de-DE": "Erweiterte Beschreibung der Kategorie"
+        },
+        "description": {
+            "en-GB": "Adds an additional description field to categories.",
+            "de-DE": "Fügt ein zusätzliches Beschreibungsfeld zu Kategorien hinzu."
+        }
+    }
+}
