@@ -3,7 +3,7 @@
 namespace SALAdditionalDescription;
 
 use Shopware\Core\Framework\Plugin;
-use Shopware\Core\Framework\Context;
+use Doctrine\DBAL\Connection;
 use Shopware\Core\Framework\Plugin\Context\ActivateContext;
 use Shopware\Core\Framework\Plugin\Context\UninstallContext;
 use Shopware\Core\System\CustomField\CustomFieldTypes;
@@ -11,6 +11,7 @@ use Shopware\Core\Defaults;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
+use Shopware\Core\Framework\Plugin\Context\DeactivateContext;
 
 class SALAdditionalDescription extends Plugin
 {
@@ -61,22 +62,61 @@ class SALAdditionalDescription extends Plugin
         ], $context);
     }
 
-    public function uninstall(UninstallContext $uninstallContext): void
+    public function deactivate(DeactivateContext $deactivateContext): void
     {
-        parent::uninstall($uninstallContext);
+        parent::deactivate($deactivateContext);
 
-        $context = $uninstallContext->getContext();
+
+        $context = $deactivateContext->getContext();
+
+        $connection = $this->container->get(Connection::class);
+        $connection->executeStatement('DELETE FROM custom_field WHERE set_id IN (SELECT id FROM custom_field_set WHERE name = :name)', [
+            'name' => self::CUSTOM_FIELD_SET_NAME
+        ]);
+
+
 
         /** @var EntityRepositoryInterface $customFieldSetRepository */
         $customFieldSetRepository = $this->container->get('custom_field_set.repository');
 
-        // Search for the custom field set by name
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsFilter('name', self::CUSTOM_FIELD_SET_NAME));
 
         $customFieldSetIds = $customFieldSetRepository->searchIds($criteria, $context)->getIds();
 
-        // Delete the custom field set if it exists
+        if (!empty($customFieldSetIds)) {
+            $customFieldSetRepository->delete(array_map(function ($id) {
+                return ['id' => $id];
+            }, $customFieldSetIds), $context);
+        }
+
+    }
+
+    public function uninstall(UninstallContext $uninstallContext): void
+    {
+        parent::uninstall($uninstallContext);
+
+        if ($uninstallContext->keepUserData()) {
+            return;
+        }
+
+        $context = $uninstallContext->getContext();
+
+        $connection = $this->container->get(Connection::class);
+        $connection->executeStatement('DELETE FROM custom_field WHERE set_id IN (SELECT id FROM custom_field_set WHERE name = :name)', [
+            'name' => self::CUSTOM_FIELD_SET_NAME
+        ]);
+
+
+
+        /** @var EntityRepositoryInterface $customFieldSetRepository */
+        $customFieldSetRepository = $this->container->get('custom_field_set.repository');
+
+        $criteria = new Criteria();
+        $criteria->addFilter(new EqualsFilter('name', self::CUSTOM_FIELD_SET_NAME));
+
+        $customFieldSetIds = $customFieldSetRepository->searchIds($criteria, $context)->getIds();
+
         if (!empty($customFieldSetIds)) {
             $customFieldSetRepository->delete(array_map(function ($id) {
                 return ['id' => $id];
