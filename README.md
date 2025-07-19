@@ -6,6 +6,7 @@
 The **Category Additional Description** plugin enhances Shopware by allowing merchants to add an extra description field for categories. This feature is useful for providing additional information, SEO content, or marketing details beyond the standard category description. The extra description is multilingual and uses Shopware’s built-in editor for a seamless experience.
 
 ## Features
+- Compatible with Shopware 6.5.x
 - Adds an additional description field to categories using Shopware's **custom fields**.
 - Supports **multilingual content**.
 - Utilizes the **default Shopware editor** for a consistent user experience.
